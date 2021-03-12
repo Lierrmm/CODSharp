@@ -1,22 +1,28 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CODSharp;
+using Games;
+using Newtonsoft.Json;
 
 namespace CODSharpCLI
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            Login().ConfigureAwait(false);
+            await Login();
             Console.ReadKey();
         }
 
-        static async Task Login()
+        private static async Task Login()
         {
-            var requests = new Requests();
-            var loggedIn = await requests.Login("<username>", "<password>");
-            if (loggedIn) await requests.MWwz("Lierrmm#2364", "battle");
+            await API.Auth.Login("email", "password");
+            Console.WriteLine($"Is Logged In? {API.isLoggedIn}");
+            if (API.isLoggedIn)
+            {
+                var output = await MW.WZ.Stats("Swankykoala#21673", "battle");
+                Console.WriteLine(JsonConvert.SerializeObject(output.data));
+            }
         }
     }
 }

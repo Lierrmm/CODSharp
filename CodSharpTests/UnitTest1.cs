@@ -12,7 +12,7 @@ namespace CodSharpTests
         [DataRow("<email>", "<password>")]
         public async Task Authenticate(string email, string password)
         {
-            var req = new Requests();
+            var req = new Authenticate();
             await req.Login(email, password);
         }
     }

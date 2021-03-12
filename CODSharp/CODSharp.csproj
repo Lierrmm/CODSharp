@@ -44,9 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Requests.cs" />
+    <Compile Include="API.cs" />
+    <Compile Include="Games\MW.cs" />
+    <Compile Include="Handler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Responses.cs" />
+    <Compile Include="Objects.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
