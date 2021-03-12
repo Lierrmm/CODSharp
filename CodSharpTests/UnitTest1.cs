@@ -10,11 +10,11 @@ namespace CodSharpTests
     {
 
         [TestMethod]
-        [DataRow("<email>", "<password>", true)]
-        public static async Task Authenticate(string email, string password, bool shouldSucceed)
+        [DataRow("<email>", "<password>", false)]
+        public async Task Authenticate(string email, string password, bool shouldSucceed)
         {
             await API.Auth.Login(email, password);
-            Assert.Equals(shouldSucceed, API.isLoggedIn);
+            Assert.AreEqual(shouldSucceed, API.isLoggedIn, $"{shouldSucceed} was expected, but outcome was {API.isLoggedIn}.");
         }
     }
 }
