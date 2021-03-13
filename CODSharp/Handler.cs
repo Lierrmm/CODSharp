@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using RestSharp;
 
 namespace CODSharp
 {
@@ -30,8 +31,15 @@ namespace CODSharp
             return await makeRequest<T>(uri, HttpMethod.Post, body, contentType);
         }
 
-        public static async Task<T> makeRequest<T>(string url, HttpMethod method, string body = null, string contentType = "application/json")
+
+        private static async Task<T> makeRequest<T>(string url, HttpMethod method, string body = null, string contentType = "application/json")
         {
+            var guid = Guid.NewGuid().ToString().ToLower();
+            var newCookies = defaultCookies;
+            newCookies += $"XSRF-TOKEN={xsrfToken};API_CSRF_TOKEN={guid};ACT_SSO_COOKIE={sso};atkn={atkn};";
+            _wc.DefaultRequestHeaders.Add("Cookie", newCookies);
+            _wc.DefaultRequestHeaders.Add("X-CSRF-TOKEN", guid);
+            _wc.DefaultRequestHeaders.Add("User-Agent", "CODSharp/0.0.1");
             var converter = TypeDescriptor.GetConverter(typeof(T));
 
             var request = new HttpRequestMessage
