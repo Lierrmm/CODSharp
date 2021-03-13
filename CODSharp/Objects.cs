@@ -1,21 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using Newtonsoft.Json.Linq;
+﻿using System.ComponentModel;
 
 namespace CODSharp
 {
     public class baseResponse
     {
         public string status { get; set; }
-    }
-
-    public class loginRequest
-    {
-        public string username { get; set; }
-        public string password { get; set; }
-        public bool remember_me { get; set; } = true;
-        public string _csrf { get; set; }
     }
 
     public class Stats : baseResponse
@@ -25,11 +14,11 @@ namespace CODSharp
 
     public enum platforms
     {
-        xbl,
-        psn,
-        battle,
-        uno,
-        acti,
+        [Description("Xbox")] xbl,
+        [Description("Playstation")] psn,
+        [Description("BattleNET")] battle,
+        [Description("Numerical Activision ID")] uno,
+        [Description("Activision ID")] acti,
         all
     }
 
@@ -42,46 +31,11 @@ namespace CODSharp
         unblock
     }
 
-
-    public static class Helpers
+    public enum friendVisibility
     {
-        public static IDictionary<string, string> ToKeyValue(this object metaToken)
-        {
-            while (true)
-            {
-                if (metaToken == null)
-                {
-                    return null;
-                }
-
-                if (!(metaToken is JToken token))
-                {
-                    metaToken = JObject.FromObject(metaToken);
-                    continue;
-                }
-
-                if (token.HasValues)
-                {
-                    var contentData = new Dictionary<string, string>();
-
-                    return token.Children()
-                        .ToList()
-                        .Select(child => child.ToKeyValue())
-                        .Where(childContent => childContent != null)
-                        .Aggregate(contentData, (current, childContent) => current.Concat(childContent)
-                            .ToDictionary(k => k.Key, v => v.Value));
-                }
-
-                var jValue = token as JValue;
-                if (jValue?.Value == null)
-                {
-                    return null;
-                }
-
-                var value = jValue?.Type == JTokenType.Date ? jValue?.ToString("o", CultureInfo.InvariantCulture) : jValue?.ToString(CultureInfo.InvariantCulture);
-
-                return new Dictionary<string, string> {{token.Path, value}};
-            }
-        }
+        all,
+        none,
+        friends,
+        friends_tourneys
     }
 }

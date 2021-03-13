@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Threading.Tasks;
 using CODSharp;
 using Account;
@@ -14,16 +15,16 @@ namespace CODSharpCLI
             await Login();
             Console.ReadKey();
         }
-
+        //"Swankykoala#21673"
         private static async Task Login()
         {
-            await API.Auth.Login("user@gmail.com", "password");
-            Console.WriteLine($"Is Logged In? {API.isLoggedIn}");
+            var email = ConfigurationManager.AppSettings["email"];
+            var password = ConfigurationManager.AppSettings["password"];
+            API.debug = Convert.ToBoolean(ConfigurationManager.AppSettings["debug"]);
+            await API.Auth.Login(email,password);
             if (API.isLoggedIn)
             {
-                var friends = await Friends.friendList();
-                Console.WriteLine(friends);
-                var output = await Friends.friendAction("7293808333332651629", platforms.uno, friendActions.uninvite);//await MW.WZ.Stats("Swankykoala#21673", "battle");
+                var output = await Friends.Search("SwankyKoala");
                 Console.WriteLine(JsonConvert.SerializeObject(output));
             }
         }

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using RestSharp;
 
 namespace CODSharp
 {
@@ -39,6 +39,7 @@ namespace CODSharp
             newCookies += $"XSRF-TOKEN={xsrfToken};API_CSRF_TOKEN={guid};ACT_SSO_COOKIE={sso};atkn={atkn};";
             _wc.DefaultRequestHeaders.Add("Cookie", newCookies);
             _wc.DefaultRequestHeaders.Add("X-CSRF-TOKEN", guid);
+            _wc.DefaultRequestHeaders.Add("X-XSRF-TOKEN", xsrfToken);
             _wc.DefaultRequestHeaders.Add("User-Agent", "CODSharp/0.0.1");
             var converter = TypeDescriptor.GetConverter(typeof(T));
 
@@ -56,10 +57,24 @@ namespace CODSharp
 
             try
             {
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
                 var response = await _wc.SendAsync(request);
+                stopwatch.Stop();
                 var happyChap = response.IsSuccessStatusCode;
                 var responseStr = await response.Content.ReadAsStringAsync();
 
+                if (debug)
+                {
+                    var timeTaken = stopwatch.ElapsedMilliseconds;
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"[DEBUG] Built URI: {url}");
+                    Console.WriteLine($"[DEBUG] Round trip took: {timeTaken}ms.");
+                    Console.WriteLine($"[DEBUG] Response size: {responseStr.Length} bytes.");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+
+                stopwatch = null;
                 if (!happyChap) throw new WebException(responseStr, (WebExceptionStatus)response.StatusCode);
                 var castToString = typeof(T) == typeof(string);
 

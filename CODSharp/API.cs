@@ -4,8 +4,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
-using RestSharp;
 
 namespace CODSharp
 {
@@ -15,7 +13,7 @@ namespace CODSharp
         private static readonly string defaultAuthUriv2 = "https://profile.callofduty.com/cod";
         private static readonly string defaultLoginv2 = "https://profile.callofduty.com/do_login?new_SiteId=cod";
         private static readonly CookieContainer cookies = new CookieContainer { PerDomainCapacity =  45, Capacity = int.MaxValue };
-        private static readonly HttpClientHandler handler = new HttpClientHandler { CookieContainer = cookies };
+        private static readonly HttpClientHandler handler = new HttpClientHandler { CookieContainer = cookies, UseCookies = true, AllowAutoRedirect = true };
         protected static readonly HttpClient _wc = new HttpClient(handler);
         public static bool isLoggedIn;
         protected static string xsrfToken;
@@ -23,16 +21,18 @@ namespace CODSharp
         protected static string sso;
         protected static string defaultCookies;
 
+        public static bool debug { get; set; } = false;
+
         public class Auth
         {
             public static async Task<bool> Login(string email, string password)
             {
                 try
                 {
-                    await _wc.GetAsync("https://profile.callofduty.com/cod/login");
+                    await _wc.GetAsync($"{defaultAuthUriv2}/login");
                     var uri = new Uri("https://callofduty.com");
-                    defaultCookies = handler.CookieContainer.GetCookies(uri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
-                    var xrsfToken = handler.CookieContainer.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "XSRF-TOKEN");
+                    defaultCookies = cookies.GetCookies(uri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
+                    var xrsfToken = cookies.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "XSRF-TOKEN");
                     if (xrsfToken == null || string.IsNullOrEmpty(xrsfToken.Value)) throw new Exception("XSRF Not set.");
                     xsrfToken = xrsfToken.Value;
                     var formContent = new FormUrlEncodedContent(new[]
@@ -45,8 +45,8 @@ namespace CODSharp
                     var request = await _wc.PostAsync(defaultLoginv2, formContent);
                     if (!request.IsSuccessStatusCode) throw new Exception("Failed to make request to login.");
                     if (request.Headers.Any(x => x.Key.ToLower().Contains("captcha"))) throw new Exception("Captcha required. Cannot complete request.");
-                    atkn = handler.CookieContainer.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "atkn")?.Value;
-                    sso = handler.CookieContainer.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "ACT_SSO_COOKIE")?.Value;
+                    atkn = cookies.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "atkn")?.Value;
+                    sso = cookies.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "ACT_SSO_COOKIE")?.Value;
                     if (string.IsNullOrEmpty(atkn) || string.IsNullOrEmpty(sso)) throw new Exception("Could not parse response.");
                     defaultCookies += cookies.GetCookies(uri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
                     isLoggedIn = true;
@@ -58,10 +58,9 @@ namespace CODSharp
                     return false;
                 }
             }
-
         }
         public class MW : Games.MW { }
-
         public class Friends : Account.Friends { }
+        public class User : Account.User { }
      }
 }

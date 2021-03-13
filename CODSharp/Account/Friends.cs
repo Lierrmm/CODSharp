@@ -21,6 +21,20 @@ namespace Account
             }
         }
 
+        public static async Task<dynamic> friendEvents()
+        {
+            try
+            {
+                var url = $"{defaultUri}/userfeed/v1/friendFeed/rendered/en";
+                return await Handler.GET(url);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+                return null;
+            }
+        }
+
         public static async Task<dynamic> friendAction(string gamertag, platforms platform, friendActions action)
         {
             try
@@ -30,6 +44,20 @@ namespace Account
                 var url = $"{defaultUri}/codfriends/v1/{action}/{platform}/{type}/{gamertag}";
                 Console.WriteLine($"[DEBUG] {url}");
                 return await Handler.POST(url, JsonConvert.SerializeObject(new {}), "text/plain");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+                return null;
+            }
+        }
+
+        public static async Task<dynamic> Search(string query)
+        {
+            try
+            {
+                var url = $"{defaultUri}/crm/cod/v2/platform/{platforms.all}/username/{query}/search";
+                return await Handler.GET(url);
             }
             catch (Exception ex)
             {
