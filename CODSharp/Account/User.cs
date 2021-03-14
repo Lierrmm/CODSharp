@@ -17,7 +17,7 @@ namespace Account
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -31,7 +31,7 @@ namespace Account
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -45,7 +45,7 @@ namespace Account
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -59,7 +59,7 @@ namespace Account
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -76,7 +76,7 @@ namespace Account
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -92,7 +92,7 @@ namespace Account
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
     }

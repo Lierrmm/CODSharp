@@ -16,12 +16,11 @@ namespace CODSharp
         private static readonly HttpClientHandler handler = new HttpClientHandler { CookieContainer = cookies, UseCookies = true, AllowAutoRedirect = true };
         protected static readonly HttpClient _wc = new HttpClient(handler);
         public static bool isLoggedIn;
-        protected static string xsrfToken;
-        protected static string atkn;
+        private static string xsrfToken;
+        private static string atkn;
         protected static string sso;
-        protected static string defaultCookies;
-
-        public static bool debug { get; set; } = false;
+        private static string defaultCookies;
+        public static bool debug = false;
 
         public class Auth
         {
@@ -48,6 +47,20 @@ namespace CODSharp
                     atkn = cookies.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "atkn")?.Value;
                     sso = cookies.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "ACT_SSO_COOKIE")?.Value;
                     if (string.IsNullOrEmpty(atkn) || string.IsNullOrEmpty(sso)) throw new Exception("Could not parse response.");
+
+                    #region cookies
+                    var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                    var guid = Guid.NewGuid().ToString().ToLower();
+                    var newCookies = defaultCookies;
+                    newCookies += $"XSRF-TOKEN={xsrfToken};API_CSRF_TOKEN={guid};ACT_SSO_COOKIE={sso};atkn={atkn};";
+                    _wc.DefaultRequestHeaders.Add("Cookie", newCookies);
+                    _wc.DefaultRequestHeaders.Add("X-CSRF-TOKEN", guid);
+                    _wc.DefaultRequestHeaders.Add("X-XSRF-TOKEN", xsrfToken);
+                    _wc.DefaultRequestHeaders.Add("User-Agent", "CODSharp/0.0.1");
+                    cookies.Add(uri, new Cookie("API_CSRF_TOKEN", guid, "/", "callofduty.com"));
+                    cookies.Add(uri, new Cookie("ACT_SSO_EVENT", $"\"LOGIN_SUCCESS:{timestamp}\"", "/", "callofduty.com"));
+                    #endregion
+
                     defaultCookies += cookies.GetCookies(uri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
                     isLoggedIn = true;
                     return isLoggedIn;

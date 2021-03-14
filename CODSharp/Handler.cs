@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -31,16 +33,9 @@ namespace CODSharp
             return await makeRequest<T>(uri, HttpMethod.Post, body, contentType);
         }
 
-
         private static async Task<T> makeRequest<T>(string url, HttpMethod method, string body = null, string contentType = "application/json")
         {
-            var guid = Guid.NewGuid().ToString().ToLower();
-            var newCookies = defaultCookies;
-            newCookies += $"XSRF-TOKEN={xsrfToken};API_CSRF_TOKEN={guid};ACT_SSO_COOKIE={sso};atkn={atkn};";
-            _wc.DefaultRequestHeaders.Add("Cookie", newCookies);
-            _wc.DefaultRequestHeaders.Add("X-CSRF-TOKEN", guid);
-            _wc.DefaultRequestHeaders.Add("X-XSRF-TOKEN", xsrfToken);
-            _wc.DefaultRequestHeaders.Add("User-Agent", "CODSharp/0.0.1");
+          
             var converter = TypeDescriptor.GetConverter(typeof(T));
 
             var request = new HttpRequestMessage
@@ -92,6 +87,33 @@ namespace CODSharp
             {
                 throw new Exception(ex.Message);
             }
+        }
+    }
+
+    public static class Helpers
+    {
+        public static T CastClass<T>(this object myobj)
+        {
+            var objectType = myobj.GetType();
+            var target = typeof(T);
+            var x = Activator.CreateInstance(target, false);
+            var z = from source in objectType.GetMembers().ToList()
+                where source.MemberType == MemberTypes.Property
+                select source;
+            var d = from source in target.GetMembers().ToList()
+                where source.MemberType == MemberTypes.Property
+                select source;
+            var members = d.Where(memberInfo => d.Select(c => c.Name)
+                .ToList().Contains(memberInfo.Name)).ToList();
+            foreach (var memberInfo in members)
+            {
+                var propertyInfo = typeof(T).GetProperty(memberInfo.Name);
+                var value = myobj.GetType().GetProperty(memberInfo.Name).GetValue(myobj, null);
+
+                propertyInfo.SetValue(x, value, null);
+            }
+
+            return (T) x;
         }
     }
 }

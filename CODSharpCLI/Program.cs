@@ -2,9 +2,7 @@
 using System.Configuration;
 using System.Threading.Tasks;
 using CODSharp;
-using Account;
 using Games;
-using Newtonsoft.Json;
 
 namespace CODSharpCLI
 {
@@ -15,7 +13,7 @@ namespace CODSharpCLI
             await Login();
             Console.ReadKey();
         }
-        //"Swankykoala#21673"
+        //"SwankyKoala#21673"
         private static async Task Login()
         {
             var email = ConfigurationManager.AppSettings["email"];
@@ -24,8 +22,16 @@ namespace CODSharpCLI
             await API.Auth.Login(email,password);
             if (API.isLoggedIn)
             {
-                var output = await Friends.Search("SwankyKoala");
-                Console.WriteLine(JsonConvert.SerializeObject(output));
+                //var output = await MW.Global.Analysis("Lierrmm#2364", platforms.battle);
+                //var output1 = await MW.WZ.FullMatchData("SwankyKoala#21673", platforms.battle);
+                //var output1 = await MW.WZ.FullMatchData("13248338508034314703", platforms.battle);
+                //Console.WriteLine(output1.data.allPlayers[0].player.username);
+                //File.WriteAllText(@"liam.txt", output);
+                //File.WriteAllText(@"swanky.txt", output1);
+
+                var output = await MW.Global.Leaderboard(1337, platforms.battle);
+                Console.WriteLine(output);
+                //File.WriteAllText(@"maps.txt", output);
             }
         }
     }

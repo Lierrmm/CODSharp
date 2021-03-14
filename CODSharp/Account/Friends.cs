@@ -17,7 +17,7 @@ namespace Account
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -31,7 +31,7 @@ namespace Account
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -42,13 +42,12 @@ namespace Account
                 var type = platform == platforms.uno ? "id" : "gamer";
                 gamertag = Uri.EscapeDataString(gamertag);
                 var url = $"{defaultUri}/codfriends/v1/{action}/{platform}/{type}/{gamertag}";
-                Console.WriteLine($"[DEBUG] {url}");
                 return await Handler.POST(url, JsonConvert.SerializeObject(new {}), "text/plain");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -56,13 +55,14 @@ namespace Account
         {
             try
             {
+                query = Uri.EscapeDataString(query);
                 var url = $"{defaultUri}/crm/cod/v2/platform/{platforms.all}/username/{query}/search";
                 return await Handler.GET(url);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
-                return null;
+                throw new Exception(ex.Message);
             }
         }
     }
