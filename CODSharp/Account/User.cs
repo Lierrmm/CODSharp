@@ -95,5 +95,16 @@ namespace Account
                 throw new Exception(ex.Message);
             }
         }
+
+        public static async Task<codPoints> getCodPoints(string gamertag, platforms platform)
+        {
+            var blockedEnums = new[] { platforms.all };
+            if (blockedEnums.Contains(platform)) throw new Exception($"{platform} not a valid platform for this endpoint.");
+            var type = platform == platforms.uno ? "id" : "gamer";
+            if (platform == platforms.acti) platform = platforms.uno;
+            gamertag = Uri.EscapeDataString(gamertag);
+            var url = $"{defaultUri}/inventory/v1/title/mw/platform/{platform}/{type}/{gamertag}/currency";
+            return await Handler.POST<codPoints>(url);
+        }
     }
 }

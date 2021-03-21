@@ -48,6 +48,7 @@
     <Compile Include="Account\Friends.cs" />
     <Compile Include="Account\User.cs" />
     <Compile Include="API.cs" />
+    <Compile Include="Games\CW.cs" />
     <Compile Include="Games\MW.cs" />
     <Compile Include="Handler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -58,7 +58,6 @@ namespace CODSharp
                 stopwatch.Stop();
                 var happyChap = response.IsSuccessStatusCode;
                 var responseStr = await response.Content.ReadAsStringAsync();
-
                 if (debug)
                 {
                     var timeTaken = stopwatch.ElapsedMilliseconds;
@@ -70,6 +69,12 @@ namespace CODSharp
                 }
 
                 stopwatch = null;
+                try
+                {
+                    var dataMap = JsonConvert.DeserializeObject<baseResponse>(responseStr);
+                    if (dataMap.data.message == "Not permitted: rate limit exceeded") isRateLimited = true;
+                } catch { }
+
                 if (!happyChap) throw new WebException(responseStr, (WebExceptionStatus)response.StatusCode);
                 var castToString = typeof(T) == typeof(string);
 

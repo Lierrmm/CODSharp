@@ -21,6 +21,7 @@ namespace CODSharp
         protected static string sso;
         private static string defaultCookies;
         public static bool debug = false;
+        public static bool isRateLimited;
 
         public class Auth
         {
@@ -36,7 +37,7 @@ namespace CODSharp
                     xsrfToken = xrsfToken.Value;
                     var formContent = new FormUrlEncodedContent(new[]
                     {
-                        new KeyValuePair<string, string>("username", email),
+                        new KeyValuePair<string, string>("username", Uri.EscapeUriString(email)),
                         new KeyValuePair<string, string>("password", password),
                         new KeyValuePair<string, string>("remember_me", "true"),
                         new KeyValuePair<string, string>("_csrf", xsrfToken)
@@ -62,7 +63,7 @@ namespace CODSharp
                     #endregion
 
                     defaultCookies += cookies.GetCookies(uri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
-                    isLoggedIn = true;
+                    isLoggedIn = request.IsSuccessStatusCode;
                     return isLoggedIn;
                 }
                 catch (Exception ex)
@@ -75,5 +76,6 @@ namespace CODSharp
         public class MW : Games.MW { }
         public class Friends : Account.Friends { }
         public class User : Account.User { }
+        public class CW : Games.CW { }
      }
 }
