@@ -41,7 +41,11 @@ namespace CODSharp
             var request = new HttpRequestMessage
             {
                 Method = method,
-                RequestUri = new Uri(url)
+                RequestUri = new Uri(url),
+                Headers =
+                {
+                    { "Cookie", defaultCookies }
+                }
             };
 
             if (!string.IsNullOrEmpty(body))

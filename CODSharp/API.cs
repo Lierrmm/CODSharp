@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Net;
+using Newtonsoft.Json.Linq;
 
 namespace CODSharp
 {
@@ -11,7 +12,7 @@ namespace CODSharp
     {
         protected static readonly string defaultUri = "https://my.callofduty.com/api/papi-client";
         private static readonly string defaultAuthUriv2 = "https://profile.callofduty.com/cod";
-        private static readonly string defaultLoginv2 = "https://profile.callofduty.com/do_login?new_SiteId=cod";
+        private static readonly string defaultLoginv2 = "https://s.activision.com/do_login?new_SiteId=activision";
         private static readonly CookieContainer cookies = new CookieContainer { PerDomainCapacity =  45, Capacity = int.MaxValue };
         private static readonly HttpClientHandler handler = new HttpClientHandler { CookieContainer = cookies, UseCookies = true, AllowAutoRedirect = true };
         protected static readonly HttpClient _wc = new HttpClient(handler);
@@ -19,7 +20,7 @@ namespace CODSharp
         private static string xsrfToken;
         private static string atkn;
         protected static string sso;
-        private static string defaultCookies;
+        public static string defaultCookies;
         public static bool debug = false;
         public static bool isRateLimited;
 
@@ -29,8 +30,8 @@ namespace CODSharp
             {
                 try
                 {
-                    await _wc.GetAsync($"{defaultAuthUriv2}/login");
-                    var uri = new Uri("https://callofduty.com");
+                    await _wc.GetAsync($"https://s.activision.com/activision/login");
+                    var uri = new Uri("https://activision.com");
                     defaultCookies = cookies.GetCookies(uri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
                     var xrsfToken = cookies.GetCookies(uri).Cast<Cookie>().FirstOrDefault(x => x.Name == "XSRF-TOKEN");
                     if (xrsfToken == null || string.IsNullOrEmpty(xrsfToken.Value)) throw new Exception("XSRF Not set.");
@@ -53,16 +54,22 @@ namespace CODSharp
                     var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                     var guid = Guid.NewGuid().ToString().ToLower();
                     var newCookies = defaultCookies;
-                    newCookies += $"XSRF-TOKEN={xsrfToken};API_CSRF_TOKEN={guid};ACT_SSO_COOKIE={sso};atkn={atkn};";
+                    newCookies += $"XSRF-TOKEN={xsrfToken};API_CSRF_TOKEN={guid};ACT_SSO_COOKIE={sso};atkn={atkn};new_SiteId=activision;ACT_SSO_EVENT=LOGIN_SUCCESS:{timestamp};";
                     _wc.DefaultRequestHeaders.Add("Cookie", newCookies);
                     _wc.DefaultRequestHeaders.Add("X-CSRF-TOKEN", guid);
                     _wc.DefaultRequestHeaders.Add("X-XSRF-TOKEN", xsrfToken);
                     _wc.DefaultRequestHeaders.Add("User-Agent", "CODSharp/0.0.1");
-                    cookies.Add(uri, new Cookie("API_CSRF_TOKEN", guid, "/", "callofduty.com"));
-                    cookies.Add(uri, new Cookie("ACT_SSO_EVENT", $"\"LOGIN_SUCCESS:{timestamp}\"", "/", "callofduty.com"));
+                    cookies.Add(uri, new Cookie("API_CSRF_TOKEN", guid, "/", "activision.com"));
+                    cookies.Add(uri, new Cookie("ACT_SSO_EVENT", $"\"LOGIN_SUCCESS:{timestamp}\"", "/", "activision.com"));
+                    cookies.Add(uri, new Cookie("new_SiteId", "activision", "/", "activision.com"));
+                    var demoUri = new Uri("https://callofduty.com");
+                    cookies.Add(demoUri, new Cookie("API_CSRF_TOKEN", guid, "/", "callofduty.com"));
+                    cookies.Add(demoUri, new Cookie("ACT_SSO_EVENT", $"\"LOGIN_SUCCESS:{timestamp}\"", "/", "callofduty.com"));
+                    cookies.Add(demoUri, new Cookie("new_SiteId", "activision", "/", "callofduty.com"));
                     #endregion
 
                     defaultCookies += cookies.GetCookies(uri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
+                    defaultCookies += cookies.GetCookies(demoUri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
                     isLoggedIn = request.IsSuccessStatusCode;
                     return isLoggedIn;
                 }
