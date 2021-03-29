@@ -13,7 +13,7 @@ namespace CODSharp
         protected static readonly string defaultUri = "https://my.callofduty.com/api/papi-client";
         private static readonly string defaultAuthUriv2 = "https://profile.callofduty.com/cod";
         private static readonly string defaultLoginv2 = "https://s.activision.com/do_login?new_SiteId=activision";
-        private static readonly CookieContainer cookies = new CookieContainer { PerDomainCapacity =  45, Capacity = int.MaxValue };
+        private static readonly CookieContainer cookies = new CookieContainer { PerDomainCapacity = 145, Capacity = int.MaxValue, MaxCookieSize = int.MaxValue };
         private static readonly HttpClientHandler handler = new HttpClientHandler { CookieContainer = cookies, UseCookies = true, AllowAutoRedirect = true };
         protected static readonly HttpClient _wc = new HttpClient(handler);
         public static bool isLoggedIn;
@@ -59,13 +59,19 @@ namespace CODSharp
                     _wc.DefaultRequestHeaders.Add("X-CSRF-TOKEN", guid);
                     _wc.DefaultRequestHeaders.Add("X-XSRF-TOKEN", xsrfToken);
                     _wc.DefaultRequestHeaders.Add("User-Agent", "CODSharp/0.0.1");
-                    cookies.Add(uri, new Cookie("API_CSRF_TOKEN", guid, "/", "activision.com"));
-                    cookies.Add(uri, new Cookie("ACT_SSO_EVENT", $"\"LOGIN_SUCCESS:{timestamp}\"", "/", "activision.com"));
-                    cookies.Add(uri, new Cookie("new_SiteId", "activision", "/", "activision.com"));
+                    //cookies.Add(uri, new Cookie("API_CSRF_TOKEN", guid, "/", "activision.com"));
+                    //cookies.Add(uri, new Cookie("ACT_SSO_EVENT", $"\"LOGIN_SUCCESS:{timestamp}\"", "/", "activision.com"));
+                    //cookies.Add(uri, new Cookie("new_SiteId", "activision", "/", "activision.com"));
                     var demoUri = new Uri("https://callofduty.com");
                     cookies.Add(demoUri, new Cookie("API_CSRF_TOKEN", guid, "/", "callofduty.com"));
                     cookies.Add(demoUri, new Cookie("ACT_SSO_EVENT", $"\"LOGIN_SUCCESS:{timestamp}\"", "/", "callofduty.com"));
                     cookies.Add(demoUri, new Cookie("new_SiteId", "activision", "/", "callofduty.com"));
+
+                    var actiCookies = cookies.GetCookies(uri).Cast<Cookie>().ToList();
+                    foreach (var actiCookie in actiCookies)
+                    {
+                        cookies.Add(demoUri, new Cookie(actiCookie.Name, actiCookie.Value, actiCookie.Path, "callofduty.com"));
+                    }
                     #endregion
 
                     defaultCookies += cookies.GetCookies(uri).Cast<Cookie>().ToList().Select(cookie => $"{cookie.Name}={cookie.Value}; ").Aggregate(string.Empty, (current, str) => current + str);
