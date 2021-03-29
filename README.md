@@ -1,3 +1,5 @@
+<img src="https://media.discordapp.net/attachments/823479024864985118/823479053318881330/CCOD_2.jpg" alt="CODSharp Logo" width="250" height="250">
+
 # CODSharp - Call Of Duty API Wrapper written in C#
 
 CODSharp is a wrapper for the "private" API that Activision use internally.
